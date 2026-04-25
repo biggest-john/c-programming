@@ -14,9 +14,6 @@ from urllib.request import urlopen, Request
 import getopt
 import unicodedata
 from xml.dom import minidom
-# some server might enforce gzip compression
-import io
-import gzip
 
 def usage():
     print("Usage: \npython rssgossip.py [-uh] <search-regexp>")
@@ -46,19 +43,22 @@ for url in os.environ["RSS_FEED"].split():
 
     try:
         with urlopen(req) as feed:
-                dom = minidom.parse(feed)
-                channel_tag = dom.getElementsByTagName("channel")[0]
+            dom = minidom.parse(feed)
+            channel_tag = dom.getElementsByTagName("channel")[0]
                 
-                for node in channel_tag.getElementsByTagName("title"):
-                    title_txt = node.firstChild.wholeText
-                    if searcher.search(title_txt):
-                        title_txt = unicodedata.normalize("NFKD", title_txt).encode("ascii", "ignore")
-                        print(title_txt)
-                        print("we got to the end")
-                        if include_urls:
-                            parent = node.parentNode
-                            link_to_source = parent.getElementsByTagName("link")[0].firstChild.wholeText
-                            print(f"\t>>>>>>{link_to_source}")
+            for node in channel_tag.getElementsByTagName("title"):
+                title_txt = node.firstChild.wholeText
+                # making the program ignore the search keyword and print out all new headline from every rss source.
+                #if you wish to be able to set a search keyword uncomment the if-statement below and and indent every line up until
+                # the except block under it.
+                #if searcher.search(title_txt):
+                title_txt = unicodedata.normalize("NFKD", title_txt)
+                print("\n",title_txt)
+                if include_urls:
+                    parent = node.parentNode
+                    link_to_source = parent.getElementsByTagName("link")[0].firstChild.wholeText
+                    print(f"\t>>>>>>{link_to_source}")
+
     except Exception as e:
         print(e)
         sys.exit(1)

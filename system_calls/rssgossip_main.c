@@ -4,6 +4,10 @@
 #include <errno.h>
 #include <string.h>
 
+void error(char msg[]){
+	fprintf(stderr, "%s : %s\n", msg, strerror(errno)); 
+	exit(1);
+}
 // remember to include the search_phrase when trying to run the programme.
 int main(int argc, char *argv[]){
 	char *feeds[] = {
@@ -17,19 +21,21 @@ int main(int argc, char *argv[]){
 		char buffer[256];
 		sprintf(buffer, "RSS_FEED=%s", feeds[i]);
 		char *env_var[] = {buffer, NULL};
+		FILE *file_out = fopen("headlines.txt", "w");
 
 		pid_t pid = fork();
 
 
 	
 		if(pid == -1){
-			fprintf(stderr, "Encountered some issues while trying to 'fork' current process: %s\n", strerror(errno));
-			return 1;
+			error("Can't fork process");
 		}
 		if(!pid){
-				if(execle("/usr/bin/python3", "/usr/bin/python3", "./rssgossip.py",search_phrase, NULL, env_var) == -1){
-					fprintf(stderr, "Encountered issues running the script: %s\n", strerror(errno));
-					return 2; 
+				if (dup2(fileno(file_out),1) == -1){
+					error("Can't redirect standard output.");
+				}
+				if(execle("/usr/bin/python3", "/usr/bin/python3", "./rssgossip.py","-u",search_phrase, NULL, env_var) == -1){
+						error("Can't run script");
 				}
 			}
 		}
