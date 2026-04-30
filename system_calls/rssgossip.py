@@ -57,7 +57,7 @@ for url in os.environ["RSS_FEED"].split():
                 if include_urls:
                     parent = node.parentNode
                     link_to_source = parent.getElementsByTagName("link")[0].firstChild.wholeText
-                    print(f"\t>>>>>>{link_to_source}")
+                    print(f"\t{link_to_source}")
 
     except Exception as e:
         print(e)
