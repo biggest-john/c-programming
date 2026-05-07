@@ -30,8 +30,7 @@ int insert(DynArray *arr, size_t index, int val){
 	/*returns 1 if index is within bound and -1 if index is out of bound*/
 	if(index < arr->size){
 		if(arr->size < arr->capacity){ //current size has to be less than the capacity to avoid trying to push beyond the the capacity bound
-			int i;
-			for(i=arr->size-1;i>=index;i--){
+			for(int i = arr->size - 1;i>=index;i--){
 				arr->data[i+1] = arr->data[i];
 			}
 			arr->data[index] = val;
