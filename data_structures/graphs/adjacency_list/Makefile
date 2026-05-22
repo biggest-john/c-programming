@@ -1,5 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -g
+LDFLAGS = -lstackandqueue
 BIN = main
 OBJ  = main.o graph_adj_list.o
 
@@ -10,7 +11,7 @@ all: $(BIN)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $^ -o $@
 $(BIN): $(OBJ)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 vis: $(BIN)
 	./$(BIN) | dot -Tpdf > vis.pdf
 clean:

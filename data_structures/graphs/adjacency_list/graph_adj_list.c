@@ -1,21 +1,17 @@
-/*yet to implement:
-- dfs
-- bfs
-*/
-
+#include "graph_adj_list.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "graph_adj_list.h"
 
-typedef struct node { /*this would be the linked list of nodes that have a connection the head
+
+typedef struct graph_node { /*this would be the linked list of nodes that have a connection the head
     would be the originator*/
     int vertex_num;
-    struct node *next;
-}node;
+    struct graph_node *next;
+}graph_node;
 
 // leaving the list struct, incase I wish to add more info i.e. degree of the head node.
 typedef struct list { // this would store the head node of each of the linked lists
-    node *head;
+    graph_node *head;
 }list;
 
 list** create_graph(int nodes) {
@@ -36,7 +32,7 @@ list** create_graph(int nodes) {
 
 bool add_node(list **adj_list, int s, int d) {
     //for an undirected graph, you would actually have to link it in two ways not one.
-    node *dst = malloc(sizeof(*dst));
+    graph_node *dst = malloc(sizeof(*dst));
     if (dst == NULL) return false; // Safety check
 
     dst->vertex_num = d;
@@ -50,7 +46,7 @@ void print_graph(list **adj_list, int nodes) {
     //this function gets piped into the viz program to help visualize the graph.
     printf("digraph{\n");
     for (int from=0; from<nodes;from++) {
-        node *current_ll_node = adj_list[from]->head;
+        graph_node *current_ll_node = adj_list[from]->head;
         while (current_ll_node) {
             printf("%i -> %i\n", from, current_ll_node->vertex_num );
             current_ll_node = current_ll_node->next;
@@ -62,11 +58,22 @@ void print_graph(list **adj_list, int nodes) {
 void destroy_graph(list **adj_list, int nodes) {
     for (int i=0; i<nodes;i++) {
         while (adj_list[i]->head) {
-            node *temp = adj_list[i]->head;
+            graph_node *temp = adj_list[i]->head;
             adj_list[i]->head = temp->next;
             free(temp);
         }
         free(adj_list[i]);
     }
     free(adj_list);
+}
+
+void dfs_iterative(list **adj_list, int num_nodes ,int start_node) {
+    // the self-implemented stack being used here is a struct that has a value field and a pointer to the
+    // next node in the stack
+    bool *visited = malloc(sizeof(bool) * num_nodes);
+    for (int i=0; i< num_nodes; i++) {
+        visited[i] = false;
+    }
+
+
 }
