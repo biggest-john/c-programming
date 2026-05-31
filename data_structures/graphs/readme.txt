@@ -32,4 +32,8 @@ perfectly clean from the get go. I can refactor later
 - DFS would use the stack implementation
 - BFS would use the queue implementation
 
+RUNNING THE PROGRAMME:
+    Please take note that to run the programme, you have to ensure that you have compiled the  queue_linked_list.c
+    and stack_linked_list.c into their object files in the graphs directory
+
 

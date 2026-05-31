@@ -1,7 +1,8 @@
 #include "graph_adj_list.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "../queue_linked_list.h"
+#include "../stack_linked_list.h"
 
 typedef struct graph_node { /*this would be the linked list of nodes that have a connection the head
     would be the originator*/
@@ -71,9 +72,73 @@ void dfs_iterative(list **adj_list, int num_nodes ,int start_node) {
     // the self-implemented stack being used here is a struct that has a value field and a pointer to the
     // next node in the stack
     bool *visited = malloc(sizeof(bool) * num_nodes);
-    for (int i=0; i< num_nodes; i++) {
+    for (int i = 0; i < num_nodes;i++) {
+        visited[i] = false;
+    }
+    stack_node *s = NULL;
+
+    push(&s, start_node);
+
+    while (s != NULL) {
+        int current = pop(&s);
+
+        if (!visited[current]) {
+            fprintf(stderr,"Visited: %d\n", current);
+            visited[current] = true;
+
+            // Add neighbors to stack
+            graph_node *neighbor = adj_list[current]->head;
+            while (neighbor) {
+                if (!visited[neighbor->vertex_num]) {
+                    push(&s, neighbor->vertex_num);
+                }
+                neighbor = neighbor->next;
+            }
+        }
+    }
+    free(visited);
+}
+
+void bfs(list **adj_list, int num_nodes, int start_node) {
+    bool *visited = malloc(sizeof(bool) * num_nodes);
+    if (visited == NULL) return; // safety net
+
+    for (int i = 0; i < num_nodes; i++) {
         visited[i] = false;
     }
 
+    // Instantiating and initializing your queue structure on the heap
+    queue *q = malloc(sizeof(queue));
+    if (q == NULL) {
+        free(visited);
+        return;
+    }
+    q->head = NULL;
+    q->tail = NULL;
 
+    // 3. Kickstart the BFS
+    enqueue(&q, start_node);
+    visited[start_node] = true;
+
+    while (q->head != NULL) {
+        // Dequeue the next node in line (FIFO)
+        int current = dequeue(&q);
+        fprintf(stderr,"Visited: %d\n", current);
+
+        // 4. Explore all immediate neighbors
+        graph_node *neighbor = adj_list[current]->head;
+        while (neighbor != NULL) {
+            int neighbor_val = neighbor->vertex_num;
+
+            // If the neighbor hasn't been discovered yet
+            if (!visited[neighbor_val]) {
+                visited[neighbor_val] = true; // Mark it now so it isn't enqueued twice
+                enqueue(&q, neighbor_val);
+            }
+            neighbor = neighbor->next;
+        }
+    }
+    // memory allocation clean up.
+    free(q);
+    free(visited);
 }

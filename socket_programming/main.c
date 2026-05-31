@@ -18,7 +18,7 @@ void error(char msg[]){
 void handle_shutdown(int sig) {
     // functon to handle the shutdown of the server ^C.
     if (listener_d) close(listener_d);
-    fprintf(stderr, "Server shutting down....\nbye\n");
+    fprintf(stderr, "\nServer shutting down....\nbye\n");
     exit(0);
 }
 
@@ -103,37 +103,46 @@ int main() {
         fprintf(stderr, "Cannot map the handler\n");
         exit(3);
     }
-    // using \r\n at the end of line of messages sent to signify that each message was done transmitting as is the network standard.
-    char *advice[] = {
-        "Take smaller bites\r\n",
-        "Go for the tight jeans. No they do NOT make you look fat.\r\n",
-        "One word: inappropriate\r\n",
-        "Just for today, be honest. Tell your boss what you *really* think\r\n",
-        "You might want to rethink that haircut\r\n"
-        };
-    // the BLAB - Bind, Listen, Accept, Begin
 
     listener_d = open_listener_socket();
-
     bind_to_socket(listener_d, 30000);
 
-    //LISTEN - waiting for attempted client connections and setting queue to size of 10
     if (listen(listener_d, 10) == -1) error("Cannot listen.");
     puts("waiting for connection.");
 
+    struct sockaddr_storage client;
+    unsigned int client_size = sizeof(client);
+    char buff[255];
+
     // using a while loop to ensure that the server is persistent(accepting clients and closing clients in order to serve others on the queue)
     while (1){
-        // ACCEPT - Creating a struct to be passed in to the accept function this struct would be populated with the client's stuff.
-        struct sockaddr_storage client;
-        unsigned int client_size = sizeof(client);
-
         const int connect_d = accept(listener_d, (struct sockaddr *) &client, &client_size); // accept wants a pointer to the sizeof client struct, unlike bind
         if (connect_d == -1) error("cannot open secondary socket."); // the connect_d descriptor is the one the server would be using
 
-        // actual transmission
-        const int byte_sent = say(connect_d, advice[rand() % 5]);
+        // main program part
+        if (!fork())
+        {
+            close(listener_d);
+            if (say(connect_d, "Internet Knock-Knock Protocol Server\r\nVersion 1.0\r\nKnock! Knock!\r\n> ") != -1) {
+                read_client_msg(connect_d, buff, sizeof(buff));
+            }
+
+            if (strncasecmp("Who's there?", buff, 12) != 0) {
+                say(connect_d, "You should say 'Who's there?'!");
+            }
+            else {
+                if (say(connect_d, "Oscar\r\n> ") != -1) {
+                    read_client_msg(connect_d, buff, sizeof(buff));
+                    if (strncasecmp("Oscar who?", buff, 10) != 0)
+                        say(connect_d, "You should say 'Oscar who?'!\r\n");
+                    else
+                        say(connect_d, "Oscar silly question, you get a silly answer\r\n");
+                }
+            }
+            close(connect_d);
+            exit(0);
+        }
         close(connect_d);
-        fprintf(stdout, "sent out %d bytes.\n", byte_sent);
     }
     return 0;
 }
